@@ -132,6 +132,10 @@ type PrometheusSpec struct {
 	// Containers allows injecting additional containers. This is meant to
 	// allow adding an authentication proxy to a Prometheus pod.
 	Containers []v1.Container `json:"containers,omitempty"`
+
+	// PrometheusArgs is a string of arguments that will be passed to the Prometheus instance.
+	// Arguments specified here will be given precedence over the normally calculated arguments.
+	PrometheusArgs []string `json:"prometheusArgs,omitempty"`
 }
 
 // Most recent observed status of the Prometheus cluster. Read-only. Not

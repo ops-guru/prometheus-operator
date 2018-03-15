@@ -219,6 +219,7 @@ Specification of the desired behavior of the Prometheus cluster. More info: http
 | securityContext | SecurityContext holds pod-level security attributes and common container settings. This defaults to non root user with uid 1000 and gid 2000 for Prometheus >v2.0 and default PodSecurityContext for other versions. | *v1.PodSecurityContext | false |
 | listenLocal | ListenLocal makes the Prometheus server listen on loopback, so that it does not bind against the Pod IP. | bool | false |
 | containers | Containers allows injecting additional containers. This is meant to allow adding an authentication proxy to a Prometheus pod. | []v1.Container | false |
+| prometheusArgs | PrometheusArgs is a list of arguments that should be added or overridden in the prometheus command. Each arguments must include a leading dash and appear exactly as they will on the cli (eg `-storage.local.target-heap-size=751619276` | []string | false |
 
 [Back to TOC](#table-of-contents)
 

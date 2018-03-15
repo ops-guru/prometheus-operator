@@ -16,6 +16,7 @@ package prometheus
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/client/monitoring/v1"
@@ -76,6 +77,51 @@ func TestPodLabelsAnnotations(t *testing.T) {
 	}
 	if !reflect.DeepEqual(annotations, sset.Spec.Template.ObjectMeta.Annotations) {
 		t.Fatal("Pod annotaitons are not properly propagated")
+	}
+}
+
+func TestPrometheusArgs(t *testing.T) {
+	labels := map[string]string{
+		"testlabel": "testlabelvalue",
+	}
+	annotations := map[string]string{
+		"testannotation": "testannotationvalue",
+	}
+	promArgs := []string{"-config.file=/etc/prometheus/custom_ku/prometheus.yaml"}
+
+	sset, err := makeStatefulSet(monitoringv1.Prometheus{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:      labels,
+			Annotations: annotations,
+		},
+		Spec: monitoringv1.PrometheusSpec{
+			PrometheusArgs: promArgs,
+		},
+	}, nil, defaultTestConfig, []*v1.ConfigMap{})
+
+	require.NoError(t, err)
+	args := sset.Spec.Template.Spec.Containers[0].Args
+
+	// We expect defaults and overridden values to be present
+	expected := promArgs
+
+	if strings.HasPrefix(args[0], "--") {
+		for i, a := range expected {
+			expected[i] = "-" + a
+		}
+		expected = append(expected, "--storage.tsdb.path=/prometheus")
+	} else {
+		expected = append(expected, "-storage.local.path=/prometheus")
+	}
+
+Outer:
+	for _, expect := range expected {
+		for _, a := range args {
+			if a == expect {
+				continue Outer
+			}
+		}
+		t.Fatalf("PrometheusArgs are not properly being propagated to the StatefulSet. Failed to find '%s' in %v", expect, args)
 	}
 }
 
