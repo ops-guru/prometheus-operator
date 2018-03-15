@@ -145,6 +145,34 @@ func generateConfig(p *v1.Prometheus, mons map[string]*v1.ServiceMonitor, ruleCo
 		cfg = append(cfg, generateRemoteReadConfig(version, p.Spec.RemoteRead, basicAuthSecrets))
 	}
 
+	if len(p.Spec.RemoteWriteEndpoints) > 0 {
+		var remoteWriteConfigs []yaml.MapSlice
+		for _, rw := range p.Spec.RemoteWriteEndpoints {
+			remoteWriteConfigs = append(remoteWriteConfigs, yaml.MapSlice{
+				{Key: "url", Value: rw.URL},
+			})
+		}
+
+		cfg = append(cfg, yaml.MapItem{
+			Key:   "remote_write",
+			Value: remoteWriteConfigs,
+		})
+	}
+
+	if len(p.Spec.RemoteReadEndpoints) > 0 {
+		var remoteReadConfigs []yaml.MapSlice
+		for _, rr := range p.Spec.RemoteReadEndpoints {
+			remoteReadConfigs = append(remoteReadConfigs, yaml.MapSlice{
+				{Key: "url", Value: rr.URL},
+			})
+		}
+
+		cfg = append(cfg, yaml.MapItem{
+			Key:   "remote_read",
+			Value: remoteReadConfigs,
+		})
+	}
+
 	return yaml.Marshal(cfg)
 }
 
