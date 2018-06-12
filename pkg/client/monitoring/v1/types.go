@@ -147,6 +147,9 @@ type PrometheusSpec struct {
 	// notes to ensure that no incompatible scrape configs are going to break
 	// Prometheus after the upgrade.
 	AdditionalScrapeConfigs *v1.SecretKeySelector `json:"additionalScrapeConfigs,omitempty"`
+	// PrometheusArgs is a string of arguments that will be passed to the Prometheus instance.
+	// Arguments specified here will be given precedence over the normally calculated arguments.
+	PrometheusArgs []string `json:"prometheusArgs,omitempty"`
 }
 
 // Most recent observed status of the Prometheus cluster. Read-only. Not

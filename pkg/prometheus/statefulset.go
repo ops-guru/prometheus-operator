@@ -411,6 +411,29 @@ func makeStatefulSetSpec(p monitoringv1.Prometheus, c *Config, ruleConfigMaps []
 		}
 	}
 
+	// Override any args that were explicitly provided
+	if p.Spec.PrometheusArgs != nil {
+		newArgs := []string{}
+
+	Overrides:
+		for _, newArg := range p.Spec.PrometheusArgs {
+			// This assumes each param is specified at most once
+			parts := strings.Split(newArg, "=")
+			for i, arg := range promArgs {
+				if strings.HasPrefix(arg, parts[0]+"=") {
+					// newArg is an override
+					promArgs[i] = newArg
+					continue Overrides
+				}
+			}
+			// newArg isn't overriding so we'll append it
+			newArgs = append(newArgs, newArg)
+		}
+		for _, arg := range newArgs {
+			promArgs = append(promArgs, arg)
+		}
+	}
+
 	if version.Major == 2 {
 		for i, a := range promArgs {
 			promArgs[i] = "-" + a
